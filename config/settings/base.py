@@ -1,7 +1,6 @@
 # ruff: noqa: ERA001, E501
 """Base settings to build other settings files upon."""
 
-
 from pathlib import Path
 
 import environ
@@ -88,6 +87,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "easy_ris.users",
     # Your stuff: custom apps go here
+    "easy_ris.core",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
