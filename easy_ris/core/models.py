@@ -55,6 +55,7 @@ class Request(models.Model):
         ],
     )
 
+    accession_number = models.CharField(max_length=20, unique=True)  # e.g. "CT-123456"
     modality = models.CharField(max_length=10, choices=Modality.choices)
     clinical_info = models.TextField()  # e.g. "Abdominal pain"
     study_requested = models.CharField(max_length=50)  # e.g. "CT Abdomen"
@@ -84,7 +85,7 @@ class Request(models.Model):
     appointment_location = models.CharField(max_length=50, blank=True)
 
     study_completed_datetime = models.DateTimeField(null=True, blank=True)
-    MIT_initials = models.CharField(max_length=50, blank=True)
+    tech_initials = models.CharField(max_length=50, blank=True)
 
     report = models.TextField(blank=True)
     rad_initials = models.CharField(max_length=50, blank=True)
