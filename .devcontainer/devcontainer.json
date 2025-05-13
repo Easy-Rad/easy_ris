@@ -21,7 +21,13 @@
     // /bin/sh -c "while sleep 1000; do :; done" when starting the container instead of the container’s default command
     "overrideCommand": false,
     "service": "django",
-    // "remoteEnv": {"PATH": "/home/dev-user/.local/bin:${containerEnv:PATH}"},
+    "containerEnv": {
+        "NODE_EXTRA_CA_CERTS": "/usr/local/share/ca-certificates/corporate.crt"
+    },
+    "remoteEnv": {
+        // "PATH": "/home/dev-user/.local/bin:${containerEnv:PATH}",
+        "NODE_EXTRA_CA_CERTS": "/usr/local/share/ca-certificates/corporate.crt"
+    },
     "remoteUser": "dev-user",
     "workspaceFolder": "/app",
     // Set *default* container specific settings.json values on container create.

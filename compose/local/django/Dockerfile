@@ -13,12 +13,11 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   # psycopg dependencies
   libpq-dev
 
-# Copy the Corporate CA certificate to the image
 COPY ./cdhb.crt /usr/local/share/ca-certificates/corporate.crt
 RUN apt-get update && apt-get install -y ca-certificates \
- && update-ca-certificates \
- && rm -rf /var/lib/apt/lists/*
-
+  && update-ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+  
 # Requirements are installed here to ensure they will be cached.
 COPY ./requirements .
 
@@ -36,6 +35,12 @@ ARG APP_HOME=/app
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV BUILD_ENV=${BUILD_ENVIRONMENT}
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/corporate.crt
+
+COPY ./cdhb.crt /usr/local/share/ca-certificates/corporate.crt
+RUN apt-get update && apt-get install -y ca-certificates \
+  && update-ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR ${APP_HOME}
 
