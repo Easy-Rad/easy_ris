@@ -1,4 +1,4 @@
-# Translations for the easy_ris project
+# Translations for the Easy RIS project
 # Copyright (C) 2025 Tubo Shi
 # Tubo Shi <tubo@tubo.nz>, 2025.
 #

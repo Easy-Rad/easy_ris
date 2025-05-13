@@ -1,9 +1,9 @@
-.. easy_ris documentation master file, created by
+.. Easy RIS documentation master file, created by
    sphinx-quickstart.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to easy_ris's documentation!
+Welcome to Easy RIS's documentation!
 ======================================================================
 
 .. toctree::

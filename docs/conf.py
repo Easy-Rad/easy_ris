@@ -28,7 +28,7 @@ django.setup()
 
 # -- Project information -----------------------------------------------------
 
-project = "easy_ris"
+project = "Easy RIS"
 copyright = """2025, Tubo Shi"""  # noqa: A001
 author = "Tubo Shi"
 

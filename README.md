@@ -1,4 +1,4 @@
-# easy_ris
+# Easy RIS
 
 Easy RIS
 
