@@ -4,7 +4,7 @@
     "python": "3.12",
     "nodejs": "20",
     "postgresql": {
-      "version":        "16",
+      "version": "16",
       "disable_plugin": false,
       "outputs": [
         "dev",
