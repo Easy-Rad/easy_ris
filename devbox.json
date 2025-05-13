@@ -4,7 +4,7 @@
     "python": "3.12",
     "nodejs": "20",
     "postgresql": {
-      "version": "16",
+      "version":        "16",
       "disable_plugin": false,
       "outputs": [
         "dev",
@@ -21,6 +21,15 @@
     "scripts": {
       "test": [
         "echo \"Error: no test specified\" && exit 1"
+      ],
+      "dev": [
+        "devbox services up"
+      ],
+      "makemigrations": [
+        "python manage.py makemigrations"
+      ],
+      "migrate": [
+        "python manage.py migrate"
       ]
     }
   }
