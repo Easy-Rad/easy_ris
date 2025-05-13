@@ -1,0 +1,23 @@
+version: "0.5"
+
+processes:
+  django:
+   command: python manage.py runserver_plus
+   availability:
+    restart: "always"
+
+  node:
+    command: npm run dev
+    availability:
+      restart: "always"
+
+  postgresql:
+    command: "pg_ctl start -o \"-k '$PGHOST'\""
+    is_daemon: true
+    shutdown: 
+      command: "pg_ctl stop -m fast"
+    availability:
+      restart: "always"
+    readiness_probe:
+      exec:
+        command: "pg_isready"

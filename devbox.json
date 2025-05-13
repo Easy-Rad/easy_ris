@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.14.0/.schema/devbox.schema.json",
+  "packages": {
+    "python": "3.12",
+    "nodejs": "20",
+    "postgresql": {
+      "version": "16",
+      "disable_plugin": false,
+      "outputs": [
+        "dev",
+        "out"
+      ]
+    }
+  },
+  "env_from": ".envs/.local/devbox.env",
+  "shell": {
+    "init_hook": [
+      "echo 'Welcome to devbox!' > /dev/null",
+      ". $VENV_DIR/bin/activate"
+    ],
+    "scripts": {
+      "test": [
+        "echo \"Error: no test specified\" && exit 1"
+      ]
+    }
+  }
+}
