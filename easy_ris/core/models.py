@@ -8,6 +8,10 @@ class Patient(models.Model):
     date_of_birth = models.DateField()
     contact = models.CharField(max_length=15, blank=True)
 
+    def save(self, *args, **kwargs):
+        self.NHI = self.NHI.upper()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.last_name}, {self.first_name} ({self.NHI})"
 
