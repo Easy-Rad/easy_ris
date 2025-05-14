@@ -7,6 +7,8 @@ from unfold.sections import TableSection, TemplateSection
 from django.db.models import Max
 from django.db.models.functions import Cast, Substr
 from django.db.models import CharField
+from django import forms
+from unfold.widgets import UnfoldAdminTextInputWidget
 
 from easy_ris.core.models import (
     Patient,
@@ -33,6 +35,19 @@ BASE_STYLE = "padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 500; bor
 
 class HorizontalChoicesFieldListFilter(ChoicesFieldListFilter):
     horizontal = True  # Enable horizontal layout
+
+
+class ReferralAdminForm(forms.ModelForm):
+    accession_override = forms.CharField(
+        max_length=20,
+        required=False,
+        help_text="Optional: Only use if there is an existing accession number",
+        widget=UnfoldAdminTextInputWidget(),
+    )
+
+    class Meta:
+        model = Referral
+        fields = "__all__"
 
 
 @admin.register(Patient)
@@ -63,6 +78,7 @@ class PatientModelAdmin(ModelAdmin):
 
 @admin.register(Referral)
 class ReferralAdmin(ModelAdmin):
+    form = ReferralAdminForm
     ordering = ["-received_datetime"]
     autocomplete_fields = ["patient"]
     list_filter_sheet = False
@@ -95,7 +111,7 @@ class ReferralAdmin(ModelAdmin):
             "Referral Details",
             {
                 "fields": (
-                    ("urgency", "accession_number"),
+                    ("urgency", "accession_override"),
                     ("modality", "study_requested"),
                     "clinical_info",
                 )
@@ -108,42 +124,31 @@ class ReferralAdmin(ModelAdmin):
         ("Metadata", {"fields": ("status", "tech_comments")}),
     )
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related("patient")
-
-    def get_next_temp_accession_number(self):
-        """Generate the next temporary accession number in the format TEMP-X"""
-        # Get the highest existing TEMP number
-        last_temp = (
-            self.model.objects.filter(accession_number__startswith="TEMP-")
-            .annotate(
-                temp_num=Cast(
-                    Substr("accession_number", 6),  # Extract number after 'TEMP-'
-                    output_field=CharField(),
-                )
-            )
-            .aggregate(max_num=Max("temp_num"))["max_num"]
-        )
-
-        # If no TEMP numbers exist yet, start with 1
-        if last_temp is None:
-            return "TEMP-1"
-
-        # Otherwise increment the last number
-        try:
-            next_num = int(last_temp) + 1
-            return f"TEMP-{next_num}"
-        except ValueError:
-            # If there's any issue with the number format, start with 1
-            return "TEMP-1"
-
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
-        if obj is None:  # Only set default for new objects
-            form.base_fields["accession_number"].initial = (
-                self.get_next_temp_accession_number()
-            )
+        # Hide the actual accession_number field
+        if "accession_number" in form.base_fields:
+            form.base_fields["accession_number"].widget = forms.HiddenInput()
         return form
+
+    def save_model(self, request, obj, form, change):
+        if not change:  # Only for new objects
+            # Check if there's an override
+            accession_override = form.cleaned_data.get("accession_override")
+            if accession_override:
+                obj.accession_number = accession_override
+            else:
+                # First save to get the ID
+                super().save_model(request, obj, form, change)
+                # Then update with the generated accession number
+                obj.accession_number = f"TEMP-{obj.id}-{obj.modality}"
+                # Save again with the new accession number
+                super().save_model(request, obj, form, change)
+                return
+        super().save_model(request, obj, form, change)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("patient")
 
     @display(description="Status")
     def display_status(self, obj):

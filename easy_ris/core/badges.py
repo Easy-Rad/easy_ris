@@ -1,11 +1,13 @@
 """Badge callbacks for the admin interface."""
 
-from easy_ris.core.models import Triage, Report
+from easy_ris.core.models import Triage, Report, Modality
 
 
 def triage_badge_callback(request):
     """Return the number of pending triages."""
-    count = Triage.objects.filter(status="Pending").count()
+    count = (
+        Triage.objects.filter(status="Pending").exclude(modality=Modality.XR).count()
+    )
     return count if count > 0 else 0
 
 

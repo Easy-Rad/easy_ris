@@ -69,6 +69,8 @@ DJANGO_APPS = [
     # "django.contrib.humanize", # Handy template tags
     "unfold",
     "unfold.contrib.filters",
+    "unfold.contrib.forms",  # optional, if special form elements are needed
+    "unfold.contrib.inlines",  # optional, if special inlines are needed
     "django.contrib.admin",
     "django.forms",
 ]
