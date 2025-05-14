@@ -1,11 +1,6 @@
 version: "0.5"
 
 processes:
-  django:
-   command: python manage.py runserver_plus
-   availability:
-    restart: "always"
-
   node:
     command: npm run dev
     availability:
