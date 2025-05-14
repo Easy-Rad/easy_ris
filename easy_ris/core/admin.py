@@ -8,7 +8,7 @@ from django.db.models import Max
 from django.db.models.functions import Cast, Substr
 from django.db.models import CharField
 from django import forms
-from unfold.widgets import UnfoldAdminTextInputWidget
+from unfold.widgets import UnfoldAdminTextInputWidget, UnfoldAdminTextareaWidget
 
 from easy_ris.core.models import (
     Patient,
@@ -44,9 +44,76 @@ class ReferralAdminForm(forms.ModelForm):
         help_text="Optional: Only use if there is an existing accession number",
         widget=UnfoldAdminTextInputWidget(),
     )
+    tech_comments = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+    clinical_info = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
 
     class Meta:
         model = Referral
+        fields = "__all__"
+
+
+class VisitAdminForm(forms.ModelForm):
+    tech_comments = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+    clinical_info = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+
+    class Meta:
+        model = Visit
+        fields = "__all__"
+
+
+class ReportAdminForm(forms.ModelForm):
+    tech_comments = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+    radiologist_comments = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+    clinical_info = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+
+    class Meta:
+        model = Report
+        fields = "__all__"
+
+
+class TriageAdminForm(forms.ModelForm):
+    tech_comments = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+    radiologist_comments = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+    clinical_info = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+
+    class Meta:
+        model = Triage
+        fields = "__all__"
+
+
+class RequestAdminForm(forms.ModelForm):
+    tech_comments = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+    radiologist_comments = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+    clinical_info = forms.CharField(
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+    )
+
+    class Meta:
+        model = Request
         fields = "__all__"
 
 
@@ -160,6 +227,8 @@ class ReferralAdmin(ModelAdmin):
 
 @admin.register(Visit)
 class VisitAdmin(ModelAdmin):
+    form = VisitAdminForm
+
     def get_queryset(self, request):
         # Only display visits with status Waitlisted, Scheduled, or Completed
         qs = super().get_queryset(request)
@@ -236,6 +305,8 @@ class VisitAdmin(ModelAdmin):
 
 @admin.register(Report)
 class ReportAdmin(ModelAdmin):
+    form = ReportAdminForm
+
     def get_queryset(self, request):
         # Only display reports with status Reported or Completed
         qs = super().get_queryset(request)
@@ -301,6 +372,7 @@ class ReportAdmin(ModelAdmin):
 
 @admin.register(Triage)
 class TriageAdmin(ModelAdmin):
+    form = TriageAdminForm
     compressed_fields = True
     list_fullwidth = True
 
@@ -398,6 +470,7 @@ class TriageAdmin(ModelAdmin):
 
 @admin.register(Request)
 class RequestAdmin(ModelAdmin):
+    form = RequestAdminForm
     ordering = ["-received_datetime"]
     autocomplete_fields = ["patient"]
     list_filter_sheet = False
