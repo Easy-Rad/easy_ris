@@ -22,7 +22,7 @@ urlpatterns = [
     path("users/", include("easy_ris.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
-    # ...
+    path("core/", include("easy_ris.core.urls", namespace="core")),
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]

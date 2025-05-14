@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Visit: {{ visit.accession_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Patient Visit</h1>
+    <div>
+      <a href="{% url 'core:visit_list' %}" class="btn btn-outline-secondary">Back to Schedule</a>
+    </div>
+  </div>
+  
+  <div class="card shadow mb-4">
+    <div class="card-header bg-light">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="h4 mb-0">{{ visit.accession_number }} - {{ visit.patient.first_name }} {{ visit.patient.last_name }}</h3>
+        <span class="badge bg-primary">{{ visit.appointment_datetime|date:"d M Y H:i" }}</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h4 class="h5 mb-3">Patient Information</h4>
+          <dl class="row">
+            <dt class="col-sm-4">Patient NHI:</dt>
+            <dd class="col-sm-8"><a href="{% url 'core:patient_detail' visit.patient.pk %}">{{ visit.patient.NHI }}</a></dd>
+            
+            <dt class="col-sm-4">Patient Name:</dt>
+            <dd class="col-sm-8">{{ visit.patient.first_name }} {{ visit.patient.last_name }}</dd>
+            
+            <dt class="col-sm-4">Date of Birth:</dt>
+            <dd class="col-sm-8">{{ visit.patient.date_of_birth|date:"d M Y" }}</dd>
+            
+            <dt class="col-sm-4">Patient Type:</dt>
+            <dd class="col-sm-8">{{ visit.get_patient_type_display }}</dd>
+          </dl>
+        </div>
+        
+        <div class="col-md-6">
+          <h4 class="h5 mb-3">Appointment Details</h4>
+          <dl class="row">
+            <dt class="col-sm-4">Date & Time:</dt>
+            <dd class="col-sm-8">{{ visit.appointment_datetime|date:"d M Y H:i" }}</dd>
+            
+            <dt class="col-sm-4">Location:</dt>
+            <dd class="col-sm-8">{{ visit.appointment_location }}</dd>
+            
+            <dt class="col-sm-4">Modality:</dt>
+            <dd class="col-sm-8">{{ visit.get_modality_display }}</dd>
+            
+            <dt class="col-sm-4">Study:</dt>
+            <dd class="col-sm-8">{{ visit.study_requested }}</dd>
+          </dl>
+        </div>
+      </div>
+      
+      <hr class="my-4">
+      
+      <div class="row">
+        <div class="col-md-6">
+          <h4 class="h5 mb-3">Protocol Information</h4>
+          <dl class="row">
+            <dt class="col-sm-4">Protocol:</dt>
+            <dd class="col-sm-8">{{ visit.triaged_protocol }}</dd>
+            
+            <dt class="col-sm-4">Urgency:</dt>
+            <dd class="col-sm-8">
+              <span class="badge {% if visit.triaged_category == 'Immediate' or visit.triaged_category == '<1 hour' or visit.triaged_category == '<4 hours' %}bg-danger{% elif visit.triaged_category == '<24 hours' %}bg-warning{% else %}bg-info{% endif %}">
+                {{ visit.triaged_category }}
+              </span>
+            </dd>
+            
+            <dt class="col-sm-4">Triaged by:</dt>
+            <dd class="col-sm-8">{{ visit.triaged_by }}</dd>
+            
+            <dt class="col-sm-4">Triaged on:</dt>
+            <dd class="col-sm-8">{{ visit.triaged_datetime|date:"d M Y H:i" }}</dd>
+          </dl>
+        </div>
+        
+        <div class="col-md-6">
+          <h4 class="h5 mb-3">Clinical Information</h4>
+          <div class="clinical-info p-2 border rounded bg-light">
+            {{ visit.clinical_info|linebreaks }}
+          </div>
+          
+          {% if visit.radiologist_comments %}
+            <h5 class="h6 mt-3 mb-2">Radiologist Comments:</h5>
+            <div class="radiologist-comments p-2 border rounded bg-light">
+              {{ visit.radiologist_comments|linebreaks }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <hr class="my-4">
+      
+      <form>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="techInitials" class="form-label">Technician Initials</label>
+              <input type="text" class="form-control" id="techInitials" placeholder="Your initials">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="studyCompletedTime" class="form-label">Completion Time</label>
+              <input type="datetime-local" class="form-control" id="studyCompletedTime">
+            </div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-12">
+            <div class="mb-3">
+              <label for="techComments" class="form-label">Technical Comments</label>
+              <textarea class="form-control" id="techComments" rows="3" placeholder="Add any technical notes or issues encountered"></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mt-3">
+          <div class="col">
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-primary">Mark as Completed</button>
+              <div>
+                <button type="button" class="btn btn-outline-secondary me-2">Reschedule</button>
+                <button type="button" class="btn btn-outline-danger">Cancel Visit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

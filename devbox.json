@@ -25,7 +25,7 @@
       "dev": [
         "devbox services up"
       ],
-      "makemigrations": [
+      "mm": [
         "python manage.py makemigrations"
       ],
       "migrate": [

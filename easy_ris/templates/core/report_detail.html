@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Report: {{ report.accession_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Radiology Report</h1>
+    <div>
+      <a href="{% url 'core:report_list' %}" class="btn btn-outline-secondary">Back to Reports</a>
+    </div>
+  </div>
+  
+  <div class="card shadow mb-4">
+    <div class="card-header bg-light">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="h4 mb-0">{{ report.accession_number }} - {{ report.patient.first_name }} {{ report.patient.last_name }}</h3>
+        <span class="badge bg-success">Completed: {{ report.study_completed_datetime|date:"d M Y H:i" }}</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h4 class="h5 mb-3">Patient Information</h4>
+          <dl class="row">
+            <dt class="col-sm-4">Patient NHI:</dt>
+            <dd class="col-sm-8"><a href="{% url 'core:patient_detail' report.patient.pk %}">{{ report.patient.NHI }}</a></dd>
+            
+            <dt class="col-sm-4">Patient Name:</dt>
+            <dd class="col-sm-8">{{ report.patient.first_name }} {{ report.patient.last_name }}</dd>
+            
+            <dt class="col-sm-4">Date of Birth:</dt>
+            <dd class="col-sm-8">{{ report.patient.date_of_birth|date:"d M Y" }}</dd>
+            
+            <dt class="col-sm-4">Patient Type:</dt>
+            <dd class="col-sm-8">{{ report.get_patient_type_display }}</dd>
+          </dl>
+        </div>
+        
+        <div class="col-md-6">
+          <h4 class="h5 mb-3">Study Information</h4>
+          <dl class="row">
+            <dt class="col-sm-4">Modality:</dt>
+            <dd class="col-sm-8">{{ report.get_modality_display }}</dd>
+            
+            <dt class="col-sm-4">Study:</dt>
+            <dd class="col-sm-8">{{ report.study_requested }}</dd>
+            
+            <dt class="col-sm-4">Protocol:</dt>
+            <dd class="col-sm-8">{{ report.triaged_protocol }}</dd>
+            
+            <dt class="col-sm-4">Technician:</dt>
+            <dd class="col-sm-8">{{ report.tech_initials }}</dd>
+          </dl>
+        </div>
+      </div>
+      
+      <hr class="my-4">
+      
+      <div class="row">
+        <div class="col-md-6">
+          <h4 class="h5 mb-3">Clinical Information</h4>
+          <div class="clinical-info p-2 border rounded bg-light">
+            {{ report.clinical_info|linebreaks }}
+          </div>
+          
+          {% if report.triaged_datetime %}
+            <h5 class="h6 mt-3 mb-2">Protocol Information:</h5>
+            <dl class="row">
+              <dt class="col-sm-4">Triaged by:</dt>
+              <dd class="col-sm-8">{{ report.triaged_by }}</dd>
+              
+              <dt class="col-sm-4">Triaged on:</dt>
+              <dd class="col-sm-8">{{ report.triaged_datetime|date:"d M Y H:i" }}</dd>
+            </dl>
+          {% endif %}
+        </div>
+        
+        <div class="col-md-6">
+          {% if report.tech_comments %}
+            <h4 class="h5 mb-3">Technician Comments</h4>
+            <div class="tech-comments p-2 border rounded bg-light mb-3">
+              {{ report.tech_comments|linebreaks }}
+            </div>
+          {% endif %}
+          
+          {% if report.radiologist_comments %}
+            <h4 class="h5 mb-3">Previous Radiologist Comments</h4>
+            <div class="radiologist-comments p-2 border rounded bg-light">
+              {{ report.radiologist_comments|linebreaks }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <hr class="my-4">
+      
+      <form>
+        <div class="row">
+          <div class="col-12">
+            <div class="mb-4">
+              <label for="reportText" class="form-label">Report</label>
+              <textarea class="form-control" id="reportText" rows="10" placeholder="Enter radiology report here...">{{ report.report }}</textarea>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="radInitials" class="form-label">Radiologist Initials</label>
+              <input type="text" class="form-control" id="radInitials" placeholder="Your initials" value="{{ report.rad_initials }}">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label for="resultNotification" class="form-label">Results Notification</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="resultNotification" placeholder="Notification sent to..." value="{{ report.results_notified }}">
+                <button class="btn btn-outline-secondary" type="button">Notify</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mt-3">
+          <div class="col">
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-primary">Submit Report</button>
+              <button type="button" class="btn btn-outline-secondary">Save Draft</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Patient: {{ patient.first_name }} {{ patient.last_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Patient Details</h1>
+    <div>
+      <a href="{% url 'core:patient_list' %}" class="btn btn-outline-secondary">Back to List</a>
+    </div>
+  </div>
+  
+  <div class="card shadow mb-4">
+    <div class="card-header bg-light">
+      <h3 class="h4 mb-0">{{ patient.first_name }} {{ patient.last_name }}</h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <dl class="row">
+            <dt class="col-sm-4">NHI:</dt>
+            <dd class="col-sm-8">{{ patient.NHI }}</dd>
+            
+            <dt class="col-sm-4">Name:</dt>
+            <dd class="col-sm-8">{{ patient.first_name }} {{ patient.last_name }}</dd>
+            
+            <dt class="col-sm-4">Date of Birth:</dt>
+            <dd class="col-sm-8">{{ patient.date_of_birth|date:"d M Y" }}</dd>
+            
+            <dt class="col-sm-4">Contact:</dt>
+            <dd class="col-sm-8">{{ patient.contact|default:"No contact information" }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Additional patient information or related records can go here -->
+  <div class="card shadow">
+    <div class="card-header bg-light">
+      <h3 class="h5 mb-0">Referral History</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="thead-light">
+            <tr>
+              <th>Accession Number</th>
+              <th>Modality</th>
+              <th>Study Requested</th>
+              <th>Date Received</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for request in patient.request_set.all %}
+              <tr>
+                <td>{{ request.accession_number }}</td>
+                <td>{{ request.get_modality_display }}</td>
+                <td>{{ request.study_requested }}</td>
+                <td>{{ request.received_datetime|date:"d M Y H:i" }}</td>
+                <td><span class="badge {% if request.status == 'Completed' or request.status == 'Reported' %}bg-success{% elif request.status == 'Cancelled' %}bg-danger{% else %}bg-warning{% endif %}">{{ request.status }}</span></td>
+                <td>
+                  {% if request.status == 'Pending' %}
+                    <a href="{% url 'core:referral_detail' request.pk %}" class="btn btn-sm btn-outline-primary">View Referral</a>
+                  {% elif request.status == 'Triaged' or request.status == 'Waitlisted' %}
+                    <a href="{% url 'core:triage_detail' request.pk %}" class="btn btn-sm btn-outline-primary">View Triage</a>
+                  {% elif request.status == 'Scheduled' %}
+                    <a href="{% url 'core:visit_detail' request.pk %}" class="btn btn-sm btn-outline-primary">View Visit</a>
+                  {% elif request.status == 'Completed' or request.status == 'Reported' %}
+                    <a href="{% url 'core:report_detail' request.pk %}" class="btn btn-sm btn-outline-primary">View Report</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center">No referrals found for this patient.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

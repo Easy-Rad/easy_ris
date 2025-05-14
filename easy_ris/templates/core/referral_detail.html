@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Referral: {{ referral.accession_number }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Referral Details</h1>
+    <div>
+      <a href="{% url 'core:referral_list' %}" class="btn btn-outline-secondary">Back to List</a>
+    </div>
+  </div>
+  
+  <div class="card shadow mb-4">
+    <div class="card-header bg-light">
+      <h3 class="h4 mb-0">{{ referral.accession_number }} - {{ referral.patient.first_name }} {{ referral.patient.last_name }}</h3>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <h4 class="h5 mb-3">Patient Information</h4>
+          <dl class="row">
+            <dt class="col-sm-4">Patient NHI:</dt>
+            <dd class="col-sm-8"><a href="{% url 'core:patient_detail' referral.patient.pk %}">{{ referral.patient.NHI }}</a></dd>
+            
+            <dt class="col-sm-4">Patient Name:</dt>
+            <dd class="col-sm-8">{{ referral.patient.first_name }} {{ referral.patient.last_name }}</dd>
+            
+            <dt class="col-sm-4">Date of Birth:</dt>
+            <dd class="col-sm-8">{{ referral.patient.date_of_birth|date:"d M Y" }}</dd>
+            
+            <dt class="col-sm-4">Patient Type:</dt>
+            <dd class="col-sm-8">{{ referral.get_patient_type_display }}</dd>
+          </dl>
+        </div>
+        
+        <div class="col-md-6">
+          <h4 class="h5 mb-3">Referrer Information</h4>
+          <dl class="row">
+            <dt class="col-sm-4">Referred by:</dt>
+            <dd class="col-sm-8">{{ referral.referrer_name }}</dd>
+            
+            <dt class="col-sm-4">Referrer Team:</dt>
+            <dd class="col-sm-8">{{ referral.referrer_team }}</dd>
+            
+            <dt class="col-sm-4">Contact:</dt>
+            <dd class="col-sm-8">{{ referral.referrer_contact|default:"Not provided" }}</dd>
+            
+            <dt class="col-sm-4">Received:</dt>
+            <dd class="col-sm-8">{{ referral.received_datetime|date:"d M Y H:i" }}</dd>
+          </dl>
+        </div>
+      </div>
+      
+      <hr class="my-4">
+      
+      <div class="row">
+        <div class="col">
+          <h4 class="h5 mb-3">Study Information</h4>
+          <dl class="row">
+            <dt class="col-sm-2">Modality:</dt>
+            <dd class="col-sm-10">{{ referral.get_modality_display }}</dd>
+            
+            <dt class="col-sm-2">Study Requested:</dt>
+            <dd class="col-sm-10">{{ referral.study_requested }}</dd>
+            
+            <dt class="col-sm-2">Urgency:</dt>
+            <dd class="col-sm-10">
+              <span class="badge {% if referral.urgency == 'Immediate' or referral.urgency == '<1 hour' or referral.urgency == '<4 hours' %}bg-danger{% elif referral.urgency == '<24 hours' %}bg-warning{% else %}bg-info{% endif %}">
+                {{ referral.urgency }}
+              </span>
+            </dd>
+            
+            <dt class="col-sm-2">Clinical Information:</dt>
+            <dd class="col-sm-10">
+              <div class="clinical-info p-2 border rounded bg-light">
+                {{ referral.clinical_info|linebreaks }}
+              </div>
+            </dd>
+          </dl>
+        </div>
+      </div>
+      
+      <div class="row mt-4">
+        <div class="col">
+          <div class="d-flex justify-content-between">
+            <a href="#" class="btn btn-primary">Triage Request</a>
+            <a href="#" class="btn btn-outline-danger">Mark as Cancelled</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
