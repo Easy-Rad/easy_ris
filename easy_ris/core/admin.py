@@ -426,16 +426,26 @@ class RequestAdmin(ModelAdmin):
     ]
 
     fieldsets = (
-        ("Patient Information", {"fields": (("patient", "patient_type"),)}),
         (
-            "Request Details",
+            "Basic Information",
             {
                 "fields": (
-                    ("referrer_name", "referrer_team", "referrer_contact"),
-                    ("urgency", "accession_number"),
-                    ("modality", "study_requested"),
+                    ("patient", "patient_type"),
+                    ("accession_number", "modality"),
+                    ("study_requested", "urgency"),
                     "clinical_info",
-                )
+                    "status",
+                ),
+            },
+        ),
+        (
+            "Referrer Information",
+            {
+                "fields": (
+                    ("referrer_name", "referrer_team"),
+                    "referrer_contact",
+                ),
+                "classes": ["tab"],
             },
         ),
         (
@@ -447,7 +457,7 @@ class RequestAdmin(ModelAdmin):
                     "triaged_by",
                     "triaged_datetime",
                 ),
-                "classes": ["collapse"],
+                "classes": ["tab"],
             },
         ),
         (
@@ -457,18 +467,17 @@ class RequestAdmin(ModelAdmin):
                     "appointment_datetime",
                     "appointment_location",
                 ),
-                "classes": ["collapse"],
+                "classes": ["tab"],
             },
         ),
         (
-            "Study Completion",
+            "Study Information",
             {
                 "fields": (
                     "study_completed_datetime",
                     "tech_initials",
-                    "tech_comments",
                 ),
-                "classes": ["collapse"],
+                "classes": ["tab"],
             },
         ),
         (
@@ -477,14 +486,22 @@ class RequestAdmin(ModelAdmin):
                 "fields": (
                     "report",
                     "rad_initials",
-                    "radiologist_comments",
                     "results_notified",
                     "results_notified_datetime",
                 ),
-                "classes": ["collapse"],
+                "classes": ["tab"],
             },
         ),
-        ("Metadata", {"fields": ("status", "received_datetime")}),
+        (
+            "Comments",
+            {
+                "fields": (
+                    "tech_comments",
+                    "radiologist_comments",
+                ),
+                "classes": ["tab"],
+            },
+        ),
     )
 
     def get_queryset(self, request):
