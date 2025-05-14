@@ -335,13 +335,7 @@ UNFOLD = {
             {
                 "title": "Navigation",
                 "separator": True,  # Top border
-                "collapsible": True,  # Collapsible group of links
                 "items": [
-                    {
-                        "title": "Dashboard",
-                        "icon": "dashboard",  # Already appropriate
-                        "link": reverse_lazy("admin:index"),
-                    },
                     {
                         "title": "Patients",
                         "icon": "personal_injury",  # Medical patient icon
@@ -355,15 +349,11 @@ UNFOLD = {
                     {
                         "title": "Triage",
                         "icon": "priority_high",  # Priority/triage icon
-                        "link": reverse_lazy("admin:core_triage_changelist"),
+                        "link": lambda request: reverse_lazy(
+                            "admin:core_triage_changelist"
+                        )
+                        + "?status=Pending",
                         "badge": "core.badges.triage_badge_callback",
-                        "subitems": [
-                            {
-                                "title": "Triage completed",
-                                "icon": "priority_high",  # Priority/triage icon
-                                "link": reverse_lazy("admin:core_triage_changelist"),
-                            },
-                        ],
                     },
                     {
                         "title": "Visits",
@@ -373,8 +363,16 @@ UNFOLD = {
                     {
                         "title": "Reports",
                         "icon": "summarize",  # Report/document icon
-                        "link": reverse_lazy("admin:core_report_changelist"),
+                        "link": lambda request: reverse_lazy(
+                            "admin:core_report_changelist"
+                        )
+                        + "?status=Completed",
                         "badge": "core.badges.report_badge_callback",
+                    },
+                    {
+                        "title": "Admin",
+                        "icon": "assignment",  # Request/assignment icon
+                        "link": reverse_lazy("admin:core_request_changelist"),
                     },
                     {
                         "title": "Users",
@@ -396,13 +394,38 @@ UNFOLD = {
         {
             "models": [
                 "core.referral",
-                "core.triage",
-                "core.visit",
-                "core.report",
             ],
             "items": [
                 {"title": modality, "link": f"./?modality={modality}"}
                 for modality in ["XR", "CT", "MRI", "US", "NM", "FL"]
+            ],
+        },
+        {
+            "models": [
+                "core.visit",
+            ],
+            "items": [
+                {"title": "Awaiting", "link": "./?status__in=Awaiting,Triaged"},
+                {"title": "Scheduled", "link": "./?status=Scheduled"},
+                {"title": "Completed", "link": "./?status__in=Completed,Reported"},
+            ],
+        },
+        {
+            "models": [
+                "core.triage",
+            ],
+            "items": [
+                {"title": "Untriaged", "link": "./?status=Pending"},
+                {"title": "Triaged", "link": "./?triaged_datetime__isnull=False"},
+            ],
+        },
+        {
+            "models": [
+                "core.report",
+            ],
+            "items": [
+                {"title": "Unreported", "link": "./?status=Completed"},
+                {"title": "Reported", "link": "./?status=Reported"},
             ],
         },
     ],

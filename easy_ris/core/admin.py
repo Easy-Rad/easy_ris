@@ -159,7 +159,7 @@ class VisitAdmin(ModelAdmin):
         # Only display visits with status Waitlisted, Scheduled, or Completed
         qs = super().get_queryset(request)
         return qs.filter(
-            status__in=["Triaged", "Waitlisted", "Scheduled", "Completed"]
+            status__in=["Triaged", "Waitlisted", "Scheduled", "Completed", "Reported"]
         ).select_related("patient")
 
     ordering = ["-appointment_datetime"]
@@ -370,13 +370,9 @@ class TriageAdmin(ModelAdmin):
     )
 
     def get_queryset(self, request):
-        # Only display triages with status Triaged or Pending
+        # Only exclude XR modality
         qs = super().get_queryset(request)
-        return (
-            qs.filter(status__in=["Triaged", "Pending"])
-            .exclude(modality=Modality.XR)
-            .select_related("patient")
-        )
+        return qs.exclude(modality=Modality.XR).select_related("patient")
 
     def save_model(self, request, obj, form, change):
         from django.utils import timezone
@@ -393,3 +389,110 @@ class TriageAdmin(ModelAdmin):
 
         # Continue with the normal save process
         super().save_model(request, obj, form, change)
+
+
+@admin.register(Request)
+class RequestAdmin(ModelAdmin):
+    ordering = ["-received_datetime"]
+    autocomplete_fields = ["patient"]
+    list_filter_sheet = False
+
+    list_display = [
+        "patient",
+        "accession_number",
+        "modality",
+        "study_requested",
+        "urgency",
+        "display_status",
+        "received_datetime",
+    ]
+
+    list_filter = [
+        "status",
+        "modality",
+        "urgency",
+    ]
+
+    search_fields = [
+        "patient__first_name",
+        "patient__last_name",
+        "patient__NHI",
+        "accession_number",
+    ]
+
+    readonly_fields = [
+        "patient",
+        "received_datetime",
+    ]
+
+    fieldsets = (
+        ("Patient Information", {"fields": (("patient", "patient_type"),)}),
+        (
+            "Request Details",
+            {
+                "fields": (
+                    ("referrer_name", "referrer_team", "referrer_contact"),
+                    ("urgency", "accession_number"),
+                    ("modality", "study_requested"),
+                    "clinical_info",
+                )
+            },
+        ),
+        (
+            "Triage Information",
+            {
+                "fields": (
+                    "triaged_protocol",
+                    "triaged_category",
+                    "triaged_by",
+                    "triaged_datetime",
+                ),
+                "classes": ["collapse"],
+            },
+        ),
+        (
+            "Appointment Information",
+            {
+                "fields": (
+                    "appointment_datetime",
+                    "appointment_location",
+                ),
+                "classes": ["collapse"],
+            },
+        ),
+        (
+            "Study Completion",
+            {
+                "fields": (
+                    "study_completed_datetime",
+                    "tech_initials",
+                    "tech_comments",
+                ),
+                "classes": ["collapse"],
+            },
+        ),
+        (
+            "Report Information",
+            {
+                "fields": (
+                    "report",
+                    "rad_initials",
+                    "radiologist_comments",
+                    "results_notified",
+                    "results_notified_datetime",
+                ),
+                "classes": ["collapse"],
+            },
+        ),
+        ("Metadata", {"fields": ("status", "received_datetime")}),
+    )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("patient")
+
+    @display(description="Status")
+    def display_status(self, obj):
+        style = f"{BASE_STYLE} {STATUS_STYLES.get(obj.status, '')}"
+        return format_html(
+            '<span style="{}">&#8226; {}</span>', style, obj.get_status_display()
+        )
