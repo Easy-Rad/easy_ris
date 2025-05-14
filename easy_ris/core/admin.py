@@ -1,10 +1,22 @@
 from django.contrib import admin
+from django.contrib.admin.filters import ChoicesFieldListFilter
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin
-from unfold.sections import TableSection, TemplateSection
 from unfold.decorators import display
+from unfold.sections import TableSection, TemplateSection
+from django.db.models import Max
+from django.db.models.functions import Cast, Substr
+from django.db.models import CharField
 
-from easy_ris.core.models import Patient, Referral, Report, Request, Triage, Visit
+from easy_ris.core.models import (
+    Patient,
+    Referral,
+    Report,
+    Request,
+    Triage,
+    Visit,
+    Modality,
+)
 
 # Define status styles
 STATUS_STYLES = {
@@ -12,15 +24,20 @@ STATUS_STYLES = {
     Request.State.TRIAGED: "background-color: #dbeafe; color: #1e40af; border-color: #93c5fd;",
     Request.State.WAITLISTED: "background-color: #f3e8ff; color: #6b21a8; border-color: #d8b4fe;",
     Request.State.SCHEDULED: "background-color: #e0e7ff; color: #3730a3; border-color: #a5b4fc;",
-    Request.State.COMPLETED: "background-color: #dcfce7; color: #166534; border-color: #86efac;",
-    Request.State.REPORTED: "background-color: #ccfbf1; color: #115e59; border-color: #5eead4;",
+    Request.State.COMPLETED: "background-color: #ccfbf1; color: #115e59; border-color: #5eead4;",
+    Request.State.REPORTED: "background-color: #dcfce7; color: #166534; border-color: #86efac;",
     Request.State.CANCELLED: "background-color: #fee2e2; color: #991b1b; border-color: #fca5a5;",
 }
 BASE_STYLE = "padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 500; border-radius: 9999px; border-width: 1px;"
 
 
+class HorizontalChoicesFieldListFilter(ChoicesFieldListFilter):
+    horizontal = True  # Enable horizontal layout
+
+
 @admin.register(Patient)
 class PatientModelAdmin(ModelAdmin):
+
     list_display = [
         "first_name",
         "last_name",
@@ -28,14 +45,27 @@ class PatientModelAdmin(ModelAdmin):
         "date_of_birth",
         "contact",
     ]
+    search_fields = ["first_name", "last_name", "NHI"]
+
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": [
+                    ("NHI", "date_of_birth"),
+                    ("first_name", "last_name"),
+                    "contact",
+                ]
+            },
+        ),
+    ]
 
 
 @admin.register(Referral)
 class ReferralAdmin(ModelAdmin):
     ordering = ["-received_datetime"]
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('patient')
+    autocomplete_fields = ["patient"]
+    list_filter_sheet = False
 
     list_display = [
         "patient",
@@ -43,20 +73,14 @@ class ReferralAdmin(ModelAdmin):
         "modality",
         "study_requested",
         "urgency",
-        "referrer_name",
         "referrer_team",
         "display_status",
         "received_datetime",
     ]
 
-    @display(description="Status")
-    def display_status(self, obj):
-        style = f"{BASE_STYLE} {STATUS_STYLES.get(obj.status, '')}"
-        return format_html(
-            '<span style="{}">&#8226; {}</span>', style, obj.get_status_display()
-        )
-
-    list_filter = ["urgency", "modality", "patient_type", "status"]
+    list_filter = [
+        "status",
+    ]
 
     search_fields = [
         "patient__first_name",
@@ -66,25 +90,67 @@ class ReferralAdmin(ModelAdmin):
     ]
 
     fieldsets = (
-        ("Patient Information", {"fields": ("patient", "patient_type")}),
+        ("Patient Information", {"fields": (("patient", "patient_type"),)}),
         (
-            "Request Details",
+            "Referral Details",
             {
                 "fields": (
-                    "accession_number",
-                    "modality",
-                    "study_requested",
+                    ("urgency", "accession_number"),
+                    ("modality", "study_requested"),
                     "clinical_info",
-                    "urgency",
                 )
             },
         ),
         (
             "Referrer Information",
-            {"fields": ("referrer_name", "referrer_team", "referrer_contact")},
+            {"fields": (("referrer_name", "referrer_team", "referrer_contact"),)},
         ),
-        ("Others", {"fields": ("status", "tech_comments")}),
+        ("Metadata", {"fields": ("status", "tech_comments")}),
     )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("patient")
+
+    def get_next_temp_accession_number(self):
+        """Generate the next temporary accession number in the format TEMP-X"""
+        # Get the highest existing TEMP number
+        last_temp = (
+            self.model.objects.filter(accession_number__startswith="TEMP-")
+            .annotate(
+                temp_num=Cast(
+                    Substr("accession_number", 6),  # Extract number after 'TEMP-'
+                    output_field=CharField(),
+                )
+            )
+            .aggregate(max_num=Max("temp_num"))["max_num"]
+        )
+
+        # If no TEMP numbers exist yet, start with 1
+        if last_temp is None:
+            return "TEMP-1"
+
+        # Otherwise increment the last number
+        try:
+            next_num = int(last_temp) + 1
+            return f"TEMP-{next_num}"
+        except ValueError:
+            # If there's any issue with the number format, start with 1
+            return "TEMP-1"
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if obj is None:  # Only set default for new objects
+            form.base_fields["accession_number"].initial = (
+                self.get_next_temp_accession_number()
+            )
+        return form
+
+    @display(description="Status")
+    def display_status(self, obj):
+        style = f"{BASE_STYLE} {STATUS_STYLES.get(obj.status, '')}"
+        return format_html(
+            '<span style="{}">&#8226; {}</span>', style, obj.get_status_display()
+        )
 
 
 @admin.register(Visit)
@@ -92,20 +158,22 @@ class VisitAdmin(ModelAdmin):
     def get_queryset(self, request):
         # Only display visits with status Waitlisted, Scheduled, or Completed
         qs = super().get_queryset(request)
-        return qs.filter(status__in=['Triaged', 'Waitlisted', 'Scheduled', 'Completed']).select_related('patient')
-    
+        return qs.filter(
+            status__in=["Triaged", "Waitlisted", "Scheduled", "Completed"]
+        ).select_related("patient")
+
     ordering = ["-appointment_datetime"]
+    compressed_fields = True
+    list_fullwidth = True
 
     list_display = [
         "patient",
-        "accession_number",
         "modality",
-        "study_requested",
+        "triaged_protocol",
         "display_status",
         "appointment_datetime",
         "appointment_location",
         "study_completed_datetime",
-        "tech_initials",
     ]
 
     @display(description="Status")
@@ -132,22 +200,32 @@ class VisitAdmin(ModelAdmin):
     ]
 
     fieldsets = (
-        ("Patient Information", {"fields": ("patient", "patient_type")}),
         (
-            "Study Details",
+            None,
             {
-                "fields": ("accession_number", "modality", "study_requested"),
+                "fields": (
+                    ("patient", "patient_type"),
+                    "accession_number",
+                    ("modality", "study_requested"),
+                    "status",
+                    "tech_comments",
+                ),
             },
         ),
         (
             "Appointment Information",
-            {"fields": ("appointment_datetime", "appointment_location")},
+            {
+                "fields": ("appointment_datetime", "appointment_location"),
+                "classes": ["tab"],
+            },
         ),
         (
             "Study Completion",
-            {"fields": ("study_completed_datetime", "tech_initials")},
+            {
+                "fields": ("study_completed_datetime", "tech_initials"),
+                "classes": ["tab"],
+            },
         ),
-        ("Others", {"fields": ("status", "tech_comments")}),
     )
 
 
@@ -156,8 +234,8 @@ class ReportAdmin(ModelAdmin):
     def get_queryset(self, request):
         # Only display reports with status Reported or Completed
         qs = super().get_queryset(request)
-        return qs.filter(status__in=['Reported', 'Completed']).select_related('patient')
-    
+        return qs.filter(status__in=["Reported", "Completed"]).select_related("patient")
+
     list_display = [
         "patient",
         "accession_number",
@@ -195,16 +273,13 @@ class ReportAdmin(ModelAdmin):
     ]
 
     fieldsets = (
-        ("Patient Information", {"fields": ("patient", "patient_type")}),
         (
             "Study Details",
             {
                 "fields": (
-                    "accession_number",
-                    "modality",
-                    "study_requested",
+                    ("patient", "patient_type", "accession_number"),
+                    ("modality", "triaged_protocol", "study_completed_datetime"),
                     "clinical_info",
-                    "study_completed_datetime",
                 )
             },
         ),
@@ -213,19 +288,17 @@ class ReportAdmin(ModelAdmin):
             {"fields": ("report", "rad_initials", "radiologist_comments")},
         ),
         (
-            "Results Notification",
-            {"fields": ("results_notified", "results_notified_datetime")},
+            "Others",
+            {"fields": ("status", "results_notified", "results_notified_datetime")},
         ),
-        ("Others", {"fields": ("status", "tech_comments")}),
     )
 
 
 @admin.register(Triage)
 class TriageAdmin(ModelAdmin):
-    def get_queryset(self, request):
-        # Only display triages with status Triaged or Pending
-        qs = super().get_queryset(request)
-        return qs.filter(status__in=['Triaged', 'Pending']).select_related('patient')
+    compressed_fields = True
+    list_fullwidth = True
+
     list_display = [
         "patient",
         "modality",
@@ -274,32 +347,36 @@ class TriageAdmin(ModelAdmin):
             "Request Details",
             {
                 "fields": (
-                    "accession_number",
-                    "modality",
+                    ("referrer_name", "referrer_team", "referrer_contact"),
+                    ("modality", "urgency", "accession_number"),
                     "study_requested",
                     "clinical_info",
-                    "urgency",
                 )
             },
-        ),
-        (
-            "Referrer Information",
-            {"fields": ("referrer_name", "referrer_team", "referrer_contact")},
         ),
         (
             "Triage Information",
             {
                 "fields": (
-                    "triaged_protocol",
                     "triaged_category",
-                    "triaged_by",
-                    "triaged_datetime",
+                    "triaged_protocol",
                     "radiologist_comments",
+                    "triaged_by",
                     "status",
+                    "triaged_datetime",
                 )
             },
         ),
     )
+
+    def get_queryset(self, request):
+        # Only display triages with status Triaged or Pending
+        qs = super().get_queryset(request)
+        return (
+            qs.filter(status__in=["Triaged", "Pending"])
+            .exclude(modality=Modality.XR)
+            .select_related("patient")
+        )
 
     def save_model(self, request, obj, form, change):
         from django.utils import timezone
@@ -310,7 +387,7 @@ class TriageAdmin(ModelAdmin):
             original_obj = self.model.objects.get(pk=obj.pk)
 
             # Check if status is being changed to 'Triaged'
-            if original_obj.status != 'Triaged' and obj.status == 'Triaged':
+            if original_obj.status != "Triaged" and obj.status == "Triaged":
                 # Update triaged_datetime to current time
                 obj.triaged_datetime = timezone.now()
 

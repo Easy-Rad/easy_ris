@@ -9,7 +9,7 @@ class Patient(models.Model):
     contact = models.CharField(max_length=15, blank=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.NHI})"
+        return f"{self.last_name}, {self.first_name} ({self.NHI})"
 
     def __repr__(self):
         return f"Patient({self.first_name}, {self.last_name}, {self.NHI})"
@@ -47,15 +47,17 @@ class Request(models.Model):
     patient_type = models.CharField(
         max_length=10,
         choices=[
+            ("ED", "Emergency"),
             ("INP", "Inpatient"),
             ("OUT", "Outpatient"),
-            ("ED", "Emergency"),
             ("PRI", "Private"),
             ("ACC", "ACC"),
         ],
     )
 
-    accession_number = models.CharField(max_length=20, unique=True)  # e.g. "CT-123456"
+    accession_number = models.CharField(
+        max_length=20, unique=True, verbose_name="Accession"
+    )  # e.g. "CT-123456"
     modality = models.CharField(max_length=10, choices=Modality.choices)
     clinical_info = models.TextField()  # e.g. "Abdominal pain"
     study_requested = models.CharField(max_length=50)  # e.g. "CT Abdomen"

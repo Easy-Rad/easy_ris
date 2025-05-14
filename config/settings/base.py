@@ -2,7 +2,7 @@
 """Base settings to build other settings files upon."""
 
 from pathlib import Path
-
+from django.urls import reverse_lazy
 import environ
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
@@ -68,6 +68,7 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
     # "django.contrib.humanize", # Handy template tags
     "unfold",
+    "unfold.contrib.filters",
     "django.contrib.admin",
     "django.forms",
 ]
@@ -322,3 +323,87 @@ WEBPACK_LOADER = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+UNFOLD = {
+    "SITE_HEADER": "Easy RIS",
+    "SITE_TITLE": "Easy RIS",
+    "SITE_SUBHEADER": "Radiology Information System",
+    "SITE_SYMBOL": "document_scanner",
+    "SIDEBAR": {
+        "show_search": False,  # Search in applications and models names
+        "show_all_applications": False,  # Dropdown with all applications and models
+        "navigation": [
+            {
+                "title": "Navigation",
+                "separator": True,  # Top border
+                "collapsible": True,  # Collapsible group of links
+                "items": [
+                    {
+                        "title": "Dashboard",
+                        "icon": "dashboard",  # Already appropriate
+                        "link": reverse_lazy("admin:index"),
+                    },
+                    {
+                        "title": "Patients",
+                        "icon": "personal_injury",  # Medical patient icon
+                        "link": reverse_lazy("admin:core_patient_changelist"),
+                    },
+                    {
+                        "title": "Referrals",
+                        "icon": "send",  # Send/referral icon
+                        "link": reverse_lazy("admin:core_referral_changelist"),
+                    },
+                    {
+                        "title": "Triage",
+                        "icon": "priority_high",  # Priority/triage icon
+                        "link": reverse_lazy("admin:core_triage_changelist"),
+                        "badge": "core.badges.triage_badge_callback",
+                        "subitems": [
+                            {
+                                "title": "Triage completed",
+                                "icon": "priority_high",  # Priority/triage icon
+                                "link": reverse_lazy("admin:core_triage_changelist"),
+                            },
+                        ],
+                    },
+                    {
+                        "title": "Visits",
+                        "icon": "event",  # Calendar/visit icon
+                        "link": reverse_lazy("admin:core_visit_changelist"),
+                    },
+                    {
+                        "title": "Reports",
+                        "icon": "summarize",  # Report/document icon
+                        "link": reverse_lazy("admin:core_report_changelist"),
+                        "badge": "core.badges.report_badge_callback",
+                    },
+                    {
+                        "title": "Users",
+                        "icon": "people",  # Already appropriate
+                        "link": reverse_lazy("admin:users_user_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    {
+                        "title": "Groups",
+                        "icon": "groups",  # Updated to more modern groups icon
+                        "link": reverse_lazy("admin:auth_group_changelist"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                ],
+            },
+        ],
+    },
+    "TABS": [
+        {
+            "models": [
+                "core.referral",
+                "core.triage",
+                "core.visit",
+                "core.report",
+            ],
+            "items": [
+                {"title": modality, "link": f"./?modality={modality}"}
+                for modality in ["XR", "CT", "MRI", "US", "NM", "FL"]
+            ],
+        },
+    ],
+}
