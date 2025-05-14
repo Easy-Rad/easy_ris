@@ -6,13 +6,13 @@ class Patient(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     date_of_birth = models.DateField()
-    contact = models.CharField(max_length=15)
+    contact = models.CharField(max_length=15, blank=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.date_of_birth})"
+        return f"{self.first_name} {self.last_name} ({self.NHI})"
 
     def __repr__(self):
-        return f"Patient({self.first_name}, {self.last_name}, {self.date_of_birth})"
+        return f"Patient({self.first_name}, {self.last_name}, {self.NHI})"
 
 
 class Modality(models.TextChoices):
@@ -79,7 +79,7 @@ class Request(models.Model):
         blank=True,
     )
     triaged_by = models.CharField(max_length=50, blank=True)  # e.g. "Dr. Dykes"
-    triaged_datetime = models.DateTimeField(auto_now=True)
+    triaged_datetime = models.DateTimeField(blank=True, null=True)
 
     appointment_datetime = models.DateTimeField(null=True, blank=True)
     appointment_location = models.CharField(max_length=50, blank=True)
@@ -101,7 +101,35 @@ class Request(models.Model):
     )
 
     def __str__(self):
-        return f"{self.patient} - {self.procedure} ({self.date})"
+        return f"{self.patient} - {self.modality} ({self.received_datetime.strftime('%Y-%m-%d %H:%M')})"
 
     def __repr__(self):
-        return f"Request({self.patient}, {self.procedure}, {self.date})"
+        return f"Request({self.patient}, {self.modality}, {self.received_datetime.strftime('%Y-%m-%d %H:%M')})"
+
+
+class Referral(Request):
+    class Meta:
+        proxy = True
+        verbose_name = "Referral"
+        verbose_name_plural = "Referrals"
+
+
+class Visit(Request):
+    class Meta:
+        proxy = True
+        verbose_name = "Visit"
+        verbose_name_plural = "Visits"
+
+
+class Report(Request):
+    class Meta:
+        proxy = True
+        verbose_name = "Report"
+        verbose_name_plural = "Reports"
+
+
+class Triage(Request):
+    class Meta:
+        proxy = True
+        verbose_name = "Triage"
+        verbose_name_plural = "Triages"
