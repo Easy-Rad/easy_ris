@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Patient(models.Model):
@@ -105,6 +106,16 @@ class Request(models.Model):
         choices=State.choices,
         default=State.PENDING,
     )
+
+    def save(self, *args, **kwargs):
+        if self.status == self.State.COMPLETED and not self.study_completed_datetime:
+            self.study_completed_datetime = timezone.now()
+
+        # If appointment is set and status is Triaged, change to Scheduled
+        if self.appointment_datetime and self.status == self.State.TRIAGED:
+            self.status = self.State.SCHEDULED
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.patient} - {self.modality} ({self.received_datetime.strftime('%Y-%m-%d %H:%M')})"

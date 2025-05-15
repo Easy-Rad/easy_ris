@@ -2,13 +2,17 @@ from django.contrib import admin
 from django.contrib.admin.filters import ChoicesFieldListFilter
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin
-from unfold.decorators import display
+from unfold.decorators import display, action
 from unfold.sections import TableSection, TemplateSection
 from django.db.models import Max
 from django.db.models.functions import Cast, Substr
 from django.db.models import CharField
 from django import forms
 from unfold.widgets import UnfoldAdminTextInputWidget, UnfoldAdminTextareaWidget
+from django.utils import timezone
+from django.contrib import messages
+from django.http import HttpRequest, HttpResponseRedirect
+from django.urls import reverse
 
 from easy_ris.core.models import (
     Patient,
@@ -30,7 +34,7 @@ STATUS_STYLES = {
     Request.State.REPORTED: "background-color: #dcfce7; color: #166534; border-color: #86efac;",
     Request.State.CANCELLED: "background-color: #fee2e2; color: #991b1b; border-color: #fca5a5;",
 }
-BASE_STYLE = "padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 500; border-radius: 9999px; border-width: 1px;"
+BASE_STYLE = "padding: 0.15rem 0.35rem; font-size: 0.7rem; font-weight: 500; border-radius: 9999px; border-width: 1px; white-space: nowrap; display: inline-block;"
 
 
 class HorizontalChoicesFieldListFilter(ChoicesFieldListFilter):
@@ -45,7 +49,8 @@ class ReferralAdminForm(forms.ModelForm):
         widget=UnfoldAdminTextInputWidget(),
     )
     tech_comments = forms.CharField(
-        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}),
+        required=False,
     )
     clinical_info = forms.CharField(
         widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
@@ -58,7 +63,9 @@ class ReferralAdminForm(forms.ModelForm):
 
 class VisitAdminForm(forms.ModelForm):
     tech_comments = forms.CharField(
-        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
+        widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}),
+        help_text="Patient location, procedure code, etc.",
+        required=False,
     )
     clinical_info = forms.CharField(
         widget=UnfoldAdminTextareaWidget(attrs={"rows": 2}), required=False
@@ -199,6 +206,10 @@ class ReferralAdmin(ModelAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
+        # Change status from Pending to Waitlisted only for XR modality
+        if obj.status == Request.State.PENDING and obj.modality == Modality.XR:
+            obj.status = Request.State.WAITLISTED
+
         if not change:  # Only for new objects
             # Check if there's an override
             accession_override = form.cleaned_data.get("accession_override")
@@ -248,6 +259,36 @@ class VisitAdmin(ModelAdmin):
         "appointment_datetime",
         "appointment_location",
         "study_completed_datetime",
+        "tech_initials",
+        "tech_comments",
+    ]
+
+    @action(
+        description="Complete study",
+        icon="check_box",
+        url_path="complete-visit",
+    )
+    def complete_visit(self, request: HttpRequest, object_id: int):
+        obj = self.get_object(request, object_id)
+        if obj.status == Request.State.SCHEDULED:
+            obj.status = Request.State.COMPLETED
+            obj.study_completed_datetime = timezone.now()
+            obj.save()
+            messages.success(
+                request, f"Visit {obj.accession_number} has been marked as completed."
+            )
+            return self.response_change(request, obj)
+        else:
+            messages.error(
+                request,
+                f"Visit {obj.accession_number} must be in Scheduled status to be completed.",
+            )
+            return HttpResponseRedirect(
+                request.META.get("HTTP_REFERER", reverse("admin:core_visit_changelist"))
+            )
+
+    actions_row = [
+        "complete_visit",
     ]
 
     @display(description="Status")
@@ -311,6 +352,12 @@ class ReportAdmin(ModelAdmin):
         # Only display reports with status Reported or Completed
         qs = super().get_queryset(request)
         return qs.filter(status__in=["Reported", "Completed"]).select_related("patient")
+
+    def save_model(self, request, obj, form, change):
+        # If status is Completed, update it to Reported
+        if obj.status == Request.State.COMPLETED:
+            obj.status = Request.State.REPORTED
+        super().save_model(request, obj, form, change)
 
     list_display = [
         "patient",
