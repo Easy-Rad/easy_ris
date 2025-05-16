@@ -6,7 +6,7 @@ from django.views import View
 from .models import Patient, Request, Report
 
 
-class SearchView(LoginRequiredMixin, View):
+class SearchView(View):
     template_name = "core/search.html"
 
     def get(self, request):
@@ -34,7 +34,7 @@ class SearchView(LoginRequiredMixin, View):
         return render(request, self.template_name)
 
 
-class ReportDetailPartialView(LoginRequiredMixin, DetailView):
+class ReportDetailPartialView(DetailView):
     model = Report
     template_name = "core/report_detail_partial.html"
     context_object_name = "report"
