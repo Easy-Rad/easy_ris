@@ -326,18 +326,24 @@ WEBPACK_LOADER = {
 # Your stuff...
 # ------------------------------------------------------------------------------
 UNFOLD = {
-    "SITE_HEADER": "Easy RIS",
+    "DASHBOARD_CALLBACK": "easy_ris.core.admin.dashboard_callback",
     "SITE_TITLE": "Easy RIS",
+    "SITE_HEADER": "Easy RIS",
     "SITE_SUBHEADER": "Radiology Information System",
-    "SITE_SYMBOL": "document_scanner",
+    "SITE_SYMBOL": "medical_services",
     "SIDEBAR": {
         "show_search": False,  # Search in applications and models names
         "show_all_applications": False,  # Dropdown with all applications and models
         "navigation": [
             {
                 "title": "Navigation",
-                "separator": True,  # Top border
+                "separator": False,  # Top border
                 "items": [
+                    {
+                        "title": "Dashboard",
+                        "icon": "home",  # Home icon
+                        "link": reverse_lazy("admin:index"),
+                    },
                     {
                         "title": "Patients",
                         "icon": "personal_injury",  # Medical patient icon
