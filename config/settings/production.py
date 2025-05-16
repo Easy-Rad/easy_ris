@@ -162,6 +162,7 @@ SPECTACULAR_SETTINGS["SERVERS"] = [
 ]
 # Your stuff...
 # ------------------------------------------------------------------------------
+USE_X_FORWARDED_HOST = True
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 CSRF_COOKIE_SAMESITE = None
 # MIDDLEWARE.remove('django.middleware.csrf.CsrfViewMiddleware')
