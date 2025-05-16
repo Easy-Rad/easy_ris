@@ -25,28 +25,48 @@
         <h2 class="text-2xl font-bold mb-4">Request Analytics</h2>
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow p-4">
-                <h3 class="text-gray-500 text-sm">Total Requests</h3>
+        <div class="grid grid-cols-1 md:grid-cols-8 gap-4 mb-6">
+            <div class="bg-gray-50 rounded-lg shadow p-4">
+                <h3 class="text-gray-500 text-sm">Total</h3>
                 <p class="text-2xl font-bold">{{ total_requests }}</p>
             </div>
-            <div class="bg-white rounded-lg shadow p-4">
-                <h3 class="text-gray-500 text-sm">Pending Requests</h3>
+            <div style="background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047;" class="rounded-lg shadow p-4">
+                <h3 class="text-sm">Pending</h3>
                 <p class="text-2xl font-bold">{{ pending_requests }}</p>
             </div>
-            <div class="bg-white rounded-lg shadow p-4">
-                <h3 class="text-gray-500 text-sm">Completed Requests</h3>
+            <div style="background-color: #dbeafe; color: #1e40af; border: 1px solid #93c5fd;" class="rounded-lg shadow p-4">
+                <h3 class="text-sm">Triaged</h3>
+                <p class="text-2xl font-bold">{{ triaged_requests }}</p>
+            </div>
+            <div style="background-color: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe;" class="rounded-lg shadow p-4">
+                <h3 class="text-sm">Waitlisted</h3>
+                <p class="text-2xl font-bold">{{ waitlisted_requests }}</p>
+            </div>
+            <div style="background-color: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc;" class="rounded-lg shadow p-4">
+                <h3 class="text-sm">Scheduled</h3>
+                <p class="text-2xl font-bold">{{ scheduled_requests }}</p>
+            </div>
+            <div style="background-color: #ccfbf1; color: #115e59; border: 1px solid #5eead4;" class="rounded-lg shadow p-4">
+                <h3 class="text-sm">Completed</h3>
                 <p class="text-2xl font-bold">{{ completed_requests }}</p>
+            </div>
+            <div style="background-color: #dcfce7; color: #166534; border: 1px solid #86efac;" class="rounded-lg shadow p-4">
+                <h3 class="text-sm">Reported</h3>
+                <p class="text-2xl font-bold">{{ reported_requests }}</p>
+            </div>
+            <div style="background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;" class="rounded-lg shadow p-4">
+                <h3 class="text-sm">Cancelled</h3>
+                <p class="text-2xl font-bold">{{ cancelled_requests }}</p>
             </div>
         </div>
 
         <!-- Requests Table -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <table class="min-w-full divide-y divide-gray-200">
+        <div class="bg-white rounded-lg shadow overflow-hidden w-full">
+            <table class="w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID
-                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Accession</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Patient</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -63,10 +83,15 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ request.accession_number }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ request.patient.first_name }} {{ request.patient.last_name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                {% if request.status == 'pending' %}bg-yellow-100 text-yellow-800
-                                {% elif request.status == 'completed' %}bg-green-100 text-green-800
-                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            <span style="padding: 0.15rem 0.35rem; font-size: 0.7rem; font-weight: 500; border-radius: 9999px; border-width: 1px; white-space: nowrap; display: inline-block;
+                                {% if request.status == 'Pending' %}background-color: #fef9c3; color: #854d0e; border: 1px solid #fde047;
+                                {% elif request.status == 'Triaged' %}background-color: #dbeafe; color: #1e40af; border: 1px solid #93c5fd;
+                                {% elif request.status == 'Waitlisted' %}background-color: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe;
+                                {% elif request.status == 'Scheduled' %}background-color: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc;
+                                {% elif request.status == 'Completed' %}background-color: #ccfbf1; color: #115e59; border: 1px solid #5eead4;
+                                {% elif request.status == 'Reported' %}background-color: #dcfce7; color: #166534; border: 1px solid #86efac;
+                                {% elif request.status == 'Cancelled' %}background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;
+                                {% else %}background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db;{% endif %}">
                                 {{ request.status|title }}
                             </span>
                         </td>

@@ -33,7 +33,14 @@ def dashboard_callback(request, context):
     # Get request statistics
     total_requests = Request.objects.count()
     pending_requests = Request.objects.filter(status=Request.State.PENDING).count()
+    triaged_requests = Request.objects.filter(status=Request.State.TRIAGED).count()
+    waitlisted_requests = Request.objects.filter(
+        status=Request.State.WAITLISTED
+    ).count()
+    scheduled_requests = Request.objects.filter(status=Request.State.SCHEDULED).count()
     completed_requests = Request.objects.filter(status=Request.State.COMPLETED).count()
+    reported_requests = Request.objects.filter(status=Request.State.REPORTED).count()
+    cancelled_requests = Request.objects.filter(status=Request.State.CANCELLED).count()
 
     # Get recent requests with patient information
     recent_requests = Request.objects.select_related("patient").order_by(
@@ -45,7 +52,12 @@ def dashboard_callback(request, context):
         {
             "total_requests": total_requests,
             "pending_requests": pending_requests,
+            "triaged_requests": triaged_requests,
+            "waitlisted_requests": waitlisted_requests,
+            "scheduled_requests": scheduled_requests,
             "completed_requests": completed_requests,
+            "reported_requests": reported_requests,
+            "cancelled_requests": cancelled_requests,
             "recent_requests": recent_requests,
         }
     )
