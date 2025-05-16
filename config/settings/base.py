@@ -366,7 +366,11 @@ UNFOLD = {
                     {
                         "title": "Visits",
                         "icon": "event",  # Calendar/visit icon
-                        "link": reverse_lazy("admin:core_visit_changelist"),
+                        "link": lambda request: reverse_lazy(
+                            "admin:core_visit_changelist"
+                        )
+                        + "?status__in=Triaged,Waitlisted,Scheduled",
+                        "badge": "core.admin_callbacks.visit_badge_callback",
                     },
                     {
                         "title": "Reports",
@@ -413,7 +417,7 @@ UNFOLD = {
                 "core.visit",
             ],
             "items": [
-                {"title": "Awaiting", "link": "./?status__in=Awaiting,Triaged"},
+                {"title": "Awaiting", "link": "./?status__in=Waitlisted,Triaged"},
                 {"title": "Scheduled", "link": "./?status=Scheduled"},
                 {"title": "Completed", "link": "./?status__in=Completed,Reported"},
             ],

@@ -17,6 +17,14 @@ def report_badge_callback(request):
     return count if count > 0 else 0
 
 
+def visit_badge_callback(request):
+    """Return the number of visits in Triaged, Waitlisted, or Scheduled status."""
+    count = Request.objects.filter(
+        status__in=["Triaged", "Waitlisted", "Scheduled"]
+    ).count()
+    return count if count > 0 else 0
+
+
 def dashboard_callback(request, context):
     """
     Callback to prepare custom variables for index template which is used as dashboard
