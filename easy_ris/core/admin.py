@@ -638,31 +638,3 @@ class RequestAdmin(ModelAdmin):
         return format_html(
             '<span style="{}">&#8226; {}</span>', style, obj.get_status_display()
         )
-
-
-def dashboard_callback(request, context):
-    """
-    Callback to prepare custom variables for index template which is used as dashboard
-    template.
-    """
-    # Get request statistics
-    total_requests = Request.objects.count()
-    pending_requests = Request.objects.filter(status=Request.State.PENDING).count()
-    completed_requests = Request.objects.filter(status=Request.State.COMPLETED).count()
-
-    # Get recent requests with patient information
-    recent_requests = Request.objects.select_related("patient").order_by(
-        "-received_datetime"
-    )[:10]
-
-    # Add data to context
-    context.update(
-        {
-            "total_requests": total_requests,
-            "pending_requests": pending_requests,
-            "completed_requests": completed_requests,
-            "recent_requests": recent_requests,
-        }
-    )
-
-    return context

@@ -326,7 +326,7 @@ WEBPACK_LOADER = {
 # Your stuff...
 # ------------------------------------------------------------------------------
 UNFOLD = {
-    "DASHBOARD_CALLBACK": "easy_ris.core.admin.dashboard_callback",
+    "DASHBOARD_CALLBACK": "easy_ris.core.admin_callbacks.dashboard_callback",
     "SITE_TITLE": "Easy RIS",
     "SITE_HEADER": "Easy RIS",
     "SITE_SUBHEADER": "Radiology Information System",
@@ -361,7 +361,7 @@ UNFOLD = {
                             "admin:core_triage_changelist"
                         )
                         + "?status=Pending",
-                        "badge": "core.badges.triage_badge_callback",
+                        "badge": "core.admin_callbacks.triage_badge_callback",
                     },
                     {
                         "title": "Visits",
@@ -375,7 +375,7 @@ UNFOLD = {
                             "admin:core_report_changelist"
                         )
                         + "?status=Completed",
-                        "badge": "core.badges.report_badge_callback",
+                        "badge": "core.admin_callbacks.report_badge_callback",
                     },
                     {
                         "title": "Admin",
