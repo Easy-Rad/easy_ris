@@ -37,5 +37,8 @@
   "scripts": {
     "dev": "webpack serve --config webpack/dev.config.js",
     "build": "webpack --config webpack/prod.config.js"
+  },
+  "dependencies": {
+    "htmx.org": "^2.0.4"
   }
 }
