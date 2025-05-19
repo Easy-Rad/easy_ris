@@ -308,10 +308,13 @@ class VisitAdmin(ModelAdmin):
 
     readonly_fields = [
         "patient",
+        "patient_date_of_birth",
         "patient_type",
         "accession_number",
         "modality",
         "study_requested",
+        "triaged_protocol",
+        "triaged_category",
     ]
 
     fieldsets = (
@@ -319,9 +322,10 @@ class VisitAdmin(ModelAdmin):
             None,
             {
                 "fields": (
-                    ("patient", "patient_type"),
-                    "accession_number",
+                    ("patient", "patient_date_of_birth"),
+                    ("patient_type", "accession_number"),
                     ("modality", "study_requested"),
+                    ("triaged_protocol", "triaged_category"),
                     "status",
                     "tech_comments",
                 ),
@@ -342,6 +346,11 @@ class VisitAdmin(ModelAdmin):
             },
         ),
     )
+
+    def patient_date_of_birth(self, obj):
+        return obj.patient.date_of_birth if obj.patient else None
+
+    patient_date_of_birth.short_description = "Date of Birth"
 
 
 @admin.register(Report)
