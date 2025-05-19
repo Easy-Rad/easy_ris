@@ -71,6 +71,7 @@ DJANGO_APPS = [
     "unfold.contrib.filters",
     "unfold.contrib.forms",  # optional, if special form elements are needed
     "unfold.contrib.inlines",  # optional, if special inlines are needed
+    "unfold.contrib.import_export",
     "django.contrib.admin",
     "django.forms",
 ]
@@ -86,6 +87,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "drf_spectacular",
     "webpack_loader",
+    "import_export",
 ]
 
 LOCAL_APPS = [
@@ -355,15 +357,6 @@ UNFOLD = {
                         "link": reverse_lazy("admin:core_referral_changelist"),
                     },
                     {
-                        "title": "Triage",
-                        "icon": "priority_high",  # Priority/triage icon
-                        "link": lambda request: reverse_lazy(
-                            "admin:core_triage_changelist"
-                        )
-                        + "?status=Pending",
-                        "badge": "core.admin_callbacks.triage_badge_callback",
-                    },
-                    {
                         "title": "Visits",
                         "icon": "event",  # Calendar/visit icon
                         "link": lambda request: reverse_lazy(
@@ -371,6 +364,15 @@ UNFOLD = {
                         )
                         + "?status__in=Triaged,Waitlisted,Scheduled",
                         "badge": "core.admin_callbacks.visit_badge_callback",
+                    },
+                    {
+                        "title": "Triage",
+                        "icon": "priority_high",  # Priority/triage icon
+                        "link": lambda request: reverse_lazy(
+                            "admin:core_triage_changelist"
+                        )
+                        + "?status=Pending",
+                        "badge": "core.admin_callbacks.triage_badge_callback",
                     },
                     {
                         "title": "Reports",

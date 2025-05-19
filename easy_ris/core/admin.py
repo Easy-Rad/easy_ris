@@ -377,6 +377,7 @@ class ReportAdmin(ModelAdmin):
             '<span style="{}">&#8226; {}</span>', style, obj.get_status_display()
         )
 
+    full_width = True
     list_filter = ["modality", "status"]
     search_fields = [
         "patient__first_name",
