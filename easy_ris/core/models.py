@@ -123,6 +123,12 @@ class Request(models.Model):
     def __repr__(self):
         return f"Request({self.patient}, {self.modality}, {self.received_datetime.strftime('%Y-%m-%d %H:%M')})"
 
+    def get_inline_title(self):
+        """
+        Return the title for the inline admin form.
+        """
+        return f"{self.accession_number}"
+
 
 class Referral(Request):
     class Meta:

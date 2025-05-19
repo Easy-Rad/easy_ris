@@ -7,8 +7,8 @@ from django.http import HttpRequest, HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
-from import_export.admin import ImportExportModelAdmin, ExportActionModelAdmin
-from unfold.admin import ModelAdmin
+from import_export.admin import ExportActionModelAdmin, ImportExportModelAdmin
+from unfold.admin import ModelAdmin, StackedInline, TabularInline
 from unfold.contrib.import_export.forms import ExportForm, SelectableFieldsExportForm
 from unfold.decorators import action, display
 from unfold.sections import TableSection, TemplateSection
@@ -124,8 +124,35 @@ class RequestAdminForm(forms.ModelForm):
         fields = "__all__"
 
 
+class RequestTabularInline(TabularInline):
+    model = Request
+    hide_title = False
+    show_change_link = True
+    extra = 0
+    readonly_fields = [
+        "status",
+        "accession_number",
+        "modality",
+        "study_requested",
+        "urgency",
+        "triaged_protocol",
+        "triaged_category",
+    ]
+    fields = [
+        "status",
+        "accession_number",
+        "modality",
+        "study_requested",
+        "urgency",
+        "triaged_protocol",
+        "triaged_category",
+    ]
+
+
 @admin.register(Patient)
 class PatientModelAdmin(ModelAdmin):
+
+    inlines = [RequestTabularInline]
 
     list_display = [
         "first_name",
