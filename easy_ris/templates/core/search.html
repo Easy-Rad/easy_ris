@@ -14,8 +14,7 @@
                         <img src="{% static 'images/favicons/easy-ris-trans-192.png' %}" alt="Easy RIS" class="me-3" style="width: 32px; height: 32px;">
                         <h2 class="card-title mb-0">Patient Search</h2>
                     </div>
-                    <form method="post" class="mb-4">
-                        {% csrf_token %}
+                    <form method="get" class="mb-4">
                         <div class="input-group input-group-lg">
                             <span class="input-group-text bg-secondary border-dark">
                                 <i class="bi bi-person-badge text-dark"></i>

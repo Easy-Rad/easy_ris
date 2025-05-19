@@ -10,10 +10,7 @@ class SearchView(View):
     template_name = "core/search.html"
 
     def get(self, request):
-        return render(request, self.template_name)
-
-    def post(self, request):
-        nhi = request.POST.get("nhi", "").strip().upper()
+        nhi = request.GET.get("nhi", "").strip().upper()
         if nhi:
             try:
                 patient = Patient.objects.get(NHI=nhi)
