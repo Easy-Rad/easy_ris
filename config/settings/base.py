@@ -2,9 +2,11 @@
 """Base settings to build other settings files upon."""
 
 from pathlib import Path
-from django.urls import reverse_lazy
+
 import environ
 from django.templatetags.static import static
+from django.urls import reverse_lazy
+from import_export.formats.base_formats import XLSX
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # easy_ris/
@@ -452,3 +454,4 @@ UNFOLD = {
         },
     ],
 }
+IMPORT_EXPORT_FORMATS = [XLSX]

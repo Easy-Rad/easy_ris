@@ -1,27 +1,27 @@
-from django.contrib import admin
-from django.contrib.admin.filters import ChoicesFieldListFilter
-from django.utils.html import format_html
-from unfold.admin import ModelAdmin
-from unfold.decorators import display, action
-from unfold.sections import TableSection, TemplateSection
-from django.db.models import Max, Count
-from django.db.models.functions import Cast, Substr
-from django.db.models import CharField
 from django import forms
-from unfold.widgets import UnfoldAdminTextInputWidget, UnfoldAdminTextareaWidget
-from django.utils import timezone
-from django.contrib import messages
+from django.contrib import admin, messages
+from django.contrib.admin.filters import ChoicesFieldListFilter
+from django.db.models import CharField, Count, Max
+from django.db.models.functions import Cast, Substr
 from django.http import HttpRequest, HttpResponseRedirect
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin, ExportActionModelAdmin
+from unfold.admin import ModelAdmin
+from unfold.contrib.import_export.forms import ExportForm, SelectableFieldsExportForm
+from unfold.decorators import action, display
+from unfold.sections import TableSection, TemplateSection
+from unfold.widgets import UnfoldAdminTextareaWidget, UnfoldAdminTextInputWidget
 
 from easy_ris.core.models import (
+    Modality,
     Patient,
     Referral,
     Report,
     Request,
     Triage,
     Visit,
-    Modality,
 )
 
 # Define status styles
@@ -526,8 +526,9 @@ class TriageAdmin(ModelAdmin):
 
 
 @admin.register(Request)
-class RequestAdmin(ModelAdmin):
+class RequestAdmin(ModelAdmin, ImportExportModelAdmin):
     form = RequestAdminForm
+    export_form_class = SelectableFieldsExportForm
     ordering = ["-received_datetime"]
     autocomplete_fields = ["patient"]
     list_filter_sheet = False
