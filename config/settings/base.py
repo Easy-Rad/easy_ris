@@ -4,6 +4,7 @@
 from pathlib import Path
 from django.urls import reverse_lazy
 import environ
+from django.templatetags.static import static
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # easy_ris/
@@ -333,6 +334,13 @@ UNFOLD = {
     "SITE_HEADER": "Easy RIS",
     "SITE_SUBHEADER": "Radiology Information System",
     "SITE_SYMBOL": "medical_services",
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "href": lambda request: static("images/favicons/favicon.ico"),
+        },
+    ],
     "SIDEBAR": {
         "show_search": False,  # Search in applications and models names
         "show_all_applications": False,  # Dropdown with all applications and models
