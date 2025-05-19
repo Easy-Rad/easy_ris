@@ -17,11 +17,10 @@
                     <form method="post" class="mb-4">
                         {% csrf_token %}
                         <div class="input-group input-group-lg">
-                            <span class="input-group-text bg-black border-secondary">
-                                <i class="bi bi-person-badge text-primary"></i>
-                                <span class="text-white ps-2">NHI</span>
+                            <span class="input-group-text bg-secondary border-dark">
+                                <i class="bi bi-person-badge text-dark"></i>
                             </span>
-                            <input type="text" name="nhi" class="form-control bg-black text-white border-secondary"
+                            <input type="text" name="nhi" class="form-control bg-secondary text-white border-dark"
                                 placeholder="Enter NHI number" value="{{ nhi }}" required>
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-search me-2"></i>Search
