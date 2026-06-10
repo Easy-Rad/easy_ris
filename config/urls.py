@@ -1,3 +1,5 @@
+from os import environ
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -8,6 +10,8 @@ from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.views import SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
+
+admin.site.site_url = environ.get("SCRIPT_NAME", default="") + "/"
 
 urlpatterns = [
     # path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
