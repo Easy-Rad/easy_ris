@@ -1,6 +1,9 @@
-const path = require('path');
-const BundleTracker = require('webpack-bundle-tracker');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const path = require('path')
+const BundleTracker = require('webpack-bundle-tracker')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+// This variable should mirror the one from config/settings/production.py
+const staticUrl = `${process.env.SCRIPT_NAME || ''}/static/`
 
 module.exports = {
   target: 'web',
@@ -14,7 +17,7 @@ module.exports = {
       __dirname,
       '../easy_ris/static/webpack_bundles/',
     ),
-    publicPath: 'static/webpack_bundles/',
+    publicPath: `${staticUrl}webpack_bundles/`,
     filename: 'js/[name]-[fullhash].js',
     chunkFilename: 'js/[name]-[hash].js',
   },
@@ -54,4 +57,4 @@ module.exports = {
     modules: ['node_modules'],
     extensions: ['.js', '.jsx'],
   },
-};
+}
